@@ -1,16 +1,15 @@
 import type { GetServerSideProps, NextPage } from "next";
-import { Session } from "next-auth";
-import { getSession, signIn, signOut } from "next-auth/react";
+import { User } from "next-auth";
 import Head from "next/head";
-import Image from "next/image";
+import Link from "next/link";
 
 import { getServerAuthSession } from "../server/common/get-server-auth-session";
-import { trpc } from "../utils/trpc";
 
-const Home: NextPage<{ session: Session }> = (props) => {
+// import { trpc } from "../utils/trpc";
+
+const Home: NextPage<{ user: User }> = ({ user }) => {
   // const hello = trpc.useQuery(["example.hello", { text: "from tRPC" }]);
   // const hello = trpc.useQuery(["posts.get-all-posts"]);
-  console.log("PROPS.session", props);
   return (
     <>
       <Head>
@@ -22,25 +21,21 @@ const Home: NextPage<{ session: Session }> = (props) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="container mx-auto flex flex-col items-center justify-center min-h-screen p-4">
-        {/* TODO: Show posts */}
-        {props.user ? (
-          <button onClick={() => signOut()}>Sign out</button>
-        ) : (
-          <button onClick={() => signIn("auth0")}>Sign in</button>
-        )}
-        {/* {session && (
-          <div>
-            <p>Signed in as {session.user?.email}</p>
-            <p>Name {session.user?.name}</p>
-            <Image
-              width={200}
-              height={200}
-              src={session.user?.image ?? ""}
-              alt={session.user?.name ?? ""}
-            />
-          </div>
-        )} */}
+      <main className="container mx-auto flex flex-auto flex-col items-center justify-center">
+        <div className="text-3xl text-white font-semibold mb-4">
+          Welcome to the Social Network.
+        </div>
+        <div className="text-base text-gray-100 font-medium">
+          {user ? (
+            <Link href="/dashboard">
+              <button className="bg-cyan-700 hover:bg-cyan-900 text-white font-bold py-2 px-4 rounded">
+                Go to Dashboard
+              </button>
+            </Link>
+          ) : (
+            "Please sign in to continue."
+          )}
+        </div>
       </main>
     </>
   );
@@ -50,20 +45,16 @@ export default Home;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerAuthSession(context);
+  const user = session?.user;
 
-  if (!session) {
-    console.log("NO SSR SESSION");
-    return { props: { hello: "idk" } };
-  } else {
-    console.log("ssr session", {
-      props: {
-        session,
-      },
-    });
+  if (!user)
     return {
-      props: {
-        ...session,
-      },
+      props: {},
     };
-  }
+
+  return {
+    props: {
+      user,
+    },
+  };
 };

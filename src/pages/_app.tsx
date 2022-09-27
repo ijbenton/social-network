@@ -9,6 +9,7 @@ import { SessionProvider } from "next-auth/react";
 import type { AppType } from "next/app";
 import superjson from "superjson";
 
+import Navbar from "../components/Navbar";
 import type { AppRouter } from "../server/router";
 
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -17,6 +18,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
+      <Navbar />
       <Component {...pageProps} />
     </SessionProvider>
   );

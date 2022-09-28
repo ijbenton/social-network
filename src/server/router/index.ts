@@ -1,14 +1,14 @@
-// src/server/router/index.ts
-import { createRouter } from "./context";
 import superjson from "superjson";
 
-import { exampleRouter } from "./example";
-import { protectedExampleRouter } from "./protected-example-router";
+// src/server/router/index.ts
+import { createRouter } from "./context";
+import { postRouter } from "./post.router";
+import { reactionRouter } from "./reaction.router";
 
 export const appRouter = createRouter()
   .transformer(superjson)
-  .merge("example.", exampleRouter)
-  .merge("auth.", protectedExampleRouter);
+  .merge("post.", postRouter)
+  .merge("reaction.", reactionRouter);
 
 // export type definition of API
 export type AppRouter = typeof appRouter;

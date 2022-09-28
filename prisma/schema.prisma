@@ -2,56 +2,127 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["referentialIntegrity"]
 }
+
 datasource db {
-  provider = "mysql"
-  url = env("DATABASE_URL")
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
   referentialIntegrity = "prisma"
 }
 
 // Necessary for Next auth
 model Account {
-    id                String  @id @default(cuid())
-    userId            String
-    type              String
-    provider          String
-    providerAccountId String
-    refresh_token     String? @db.Text
-    access_token      String? @db.Text
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String? @db.Text
-    session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
+  id                  String               @id @default(cuid())
+  name                String?
+  email               String?              @unique
+  emailVerified       DateTime?
+  image               String?
+  accounts            Account[]
+  sessions            Session[]
+  posts               Post[]
+  comments            Comment[]
+  subComments         SubComment[]
+  postReactions       PostReaction[]
+  commentReactions    CommentReaction[]
+  subCommentReactions SubCommentReaction[]
 }
 
 model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
-    @@unique([identifier, token])
+  @@unique([identifier, token])
+}
+
+model Post {
+  id        String         @id @default(cuid())
+  userId    String
+  title     String         @db.Text
+  body      String         @db.Text
+  comments  Comment[]
+  reactions PostReaction[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  user      User           @relation(fields: [userId], references: [id])
+}
+
+model Comment {
+  id          String            @id @default(cuid())
+  postId      String
+  userId      String
+  message     String            @db.Text
+  reactions   CommentReaction[]
+  subcomments SubComment[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  post        Post              @relation(fields: [postId], references: [id])
+  user        User              @relation(fields: [userId], references: [id])
+}
+
+model SubComment {
+  id        String               @id @default(cuid())
+  commentId String
+  userId    String
+  message   String               @db.Text
+  reactions SubCommentReaction[]
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  comment   Comment              @relation(fields: [commentId], references: [id])
+  user      User                 @relation(fields: [userId], references: [id])
+}
+
+model PostReaction {
+  id      String  @id @default(cuid())
+  postId  String
+  userId  String
+  isLiked Boolean
+  post    Post    @relation(fields: [postId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+}
+
+model CommentReaction {
+  id        String  @id @default(cuid())
+  commentId String
+  userId    String
+  isLiked   Boolean
+  comment   Comment @relation(fields: [commentId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+}
+
+model SubCommentReaction {
+  id           String     @id @default(cuid())
+  subCommentId String
+  userId       String
+  isLiked      Boolean
+  comment      SubComment @relation(fields: [subCommentId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
 }

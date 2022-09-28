@@ -1,15 +1,18 @@
 import type { GetServerSideProps, NextPage } from "next";
 import { User } from "next-auth";
 import Head from "next/head";
-import Link from "next/link";
 
+import Post from "../components/Post";
+import Spinner from "../components/Spinner";
 import { getServerAuthSession } from "../server/common/get-server-auth-session";
-
-// import { trpc } from "../utils/trpc";
+import { trpc } from "../utils/trpc";
 
 const Home: NextPage<{ user: User }> = ({ user }) => {
-  // const hello = trpc.useQuery(["example.hello", { text: "from tRPC" }]);
-  // const hello = trpc.useQuery(["posts.get-all-posts"]);
+  const { data, isLoading } = trpc.useQuery(["post.posts"], {
+    // staleTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
   return (
     <>
       <Head>
@@ -21,21 +24,29 @@ const Home: NextPage<{ user: User }> = ({ user }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="container mx-auto flex flex-auto flex-col items-center justify-center">
-        <div className="text-3xl text-white font-semibold mb-4">
-          Welcome to the Social Network.
-        </div>
-        <div className="text-base text-gray-100 font-medium">
-          {user ? (
-            <Link href="/dashboard">
-              <button className="bg-cyan-700 hover:bg-cyan-900 text-white font-bold py-2 px-4 rounded">
-                Go to Dashboard
-              </button>
-            </Link>
-          ) : (
-            "Please sign in to continue."
-          )}
-        </div>
+      <main className="container mx-auto mt-6 flex flex-auto flex-col gap-4">
+        {user ? (
+          <>
+            {isLoading ? (
+              <div className="flex justify-center items-center flex-auto">
+                <Spinner />
+              </div>
+            ) : (
+              data?.map((post) => (
+                <Post post={post} user={user} key={post.id} />
+              ))
+            )}
+          </>
+        ) : (
+          <>
+            <div className="text-3xl text-white font-semibold">
+              Welcome to the Social Network.
+            </div>
+            <div className="text-base text-gray-100 font-medium">
+              Please sign in to continue.
+            </div>
+          </>
+        )}
       </main>
     </>
   );

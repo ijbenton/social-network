@@ -7,9 +7,11 @@ import { withTRPC } from "@trpc/next";
 import type { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import type { AppType } from "next/app";
+import { Provider } from "react-redux";
 import superjson from "superjson";
 
 import Navbar from "../components/Navbar";
+import store from "../redux/store";
 import type { AppRouter } from "../server/router";
 
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -18,8 +20,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-      <Navbar />
-      <Component {...pageProps} />
+      <Provider store={store}>
+        <Navbar />
+        <Component {...pageProps} />
+      </Provider>
     </SessionProvider>
   );
 };

@@ -8,6 +8,8 @@ import {
   FaRegThumbsDown,
   FaRegThumbsUp,
 } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { reactToPost, removeReaction } from "../redux/slice/postSlice";
 import { getReactionsData } from "../utils/post";
 import { trpc } from "../utils/trpc";
 type PostProps = {
@@ -20,21 +22,25 @@ type PostProps = {
 };
 
 const Post = ({ post, user }: PostProps) => {
+  const dispatch = useDispatch();
   const { numberOfLikes, numberOfDisLikes, postReaction } = useMemo(
     () => getReactionsData(post.reactions, user),
     [post, user]
   );
 
   const upsert = trpc.useMutation("reaction.upsert-post", {
-    // onSuccess({ id }) {},
+    onSuccess(reaction) {
+      dispatch(reactToPost(reaction));
+    },
     onError({ message }) {
       alert(message);
     },
   });
 
   const remove = trpc.useMutation("reaction.delete-post", {
-    // onSuccess({ id }) {},
-    // onError({ message }) {},
+    onError({ message }) {
+      alert(message);
+    },
   });
 
   const handleReaction = (isLiked: boolean) => {
@@ -44,6 +50,7 @@ const Post = ({ post, user }: PostProps) => {
       ((postReaction.isLiked && isLiked) || (!postReaction.isLiked && !isLiked))
     ) {
       remove.mutate({ postReactionId: postReaction.id });
+      dispatch(removeReaction(postReaction));
     }
     // User is either creating a reaction for the first time
     // OR switching their like to a dislike, vice versa

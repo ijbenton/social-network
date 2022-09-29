@@ -1,17 +1,25 @@
 import type { GetServerSideProps, NextPage } from "next";
 import { User } from "next-auth";
 import Head from "next/head";
+import { useDispatch, useSelector } from "react-redux";
 
 import Post from "../components/Post";
 import Spinner from "../components/Spinner";
+import { setPosts } from "../redux/slice/postSlice";
+import { RootState } from "../redux/store";
 import { getServerAuthSession } from "../server/common/get-server-auth-session";
 import { trpc } from "../utils/trpc";
 
 const Home: NextPage<{ user: User }> = ({ user }) => {
-  const { data, isLoading } = trpc.useQuery(["post.posts"], {
+  const dispatch = useDispatch();
+  const posts = useSelector((state: RootState) => state.posts.posts);
+  const { isLoading } = trpc.useQuery(["post.posts"], {
     // staleTime: Infinity,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
+    onSuccess(data) {
+      dispatch(setPosts(data));
+    },
   });
   return (
     <>
@@ -32,7 +40,7 @@ const Home: NextPage<{ user: User }> = ({ user }) => {
                 <Spinner />
               </div>
             ) : (
-              data?.map((post) => (
+              posts?.map((post) => (
                 <Post post={post} user={user} key={post.id} />
               ))
             )}

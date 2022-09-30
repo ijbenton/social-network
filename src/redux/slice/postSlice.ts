@@ -1,11 +1,12 @@
 import { PostReaction } from "@prisma/client";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import isUndefined from "lodash.isundefined";
 
 import { PostWithSubData } from "../../model/Post";
 import { PostsState } from "../state/PostState";
 
 const initialState: PostsState = {
-  posts: [],
+  posts: {},
 };
 
 export const postSlice = createSlice({
@@ -13,50 +14,44 @@ export const postSlice = createSlice({
   initialState,
   reducers: {
     setPosts: (state, action: PayloadAction<PostWithSubData[]>) => {
-      state.posts = action.payload;
+      action.payload.forEach((post) => {
+        state.posts[post.id] = post;
+      });
     },
-    reactToPost: (state, action: PayloadAction<PostReaction>) => {
-      state.posts = state.posts.map((post) => {
-        if (post.id === action.payload.postId) {
-          const foundPost = { ...post };
-          const foundReaction = foundPost.reactions.find(
-            (reaction) => reaction.id === action.payload.id
-          );
-          // Update prev reaction (like/dislike)
-          if (foundReaction) {
-            foundPost.reactions = foundPost.reactions.map((reaction) => {
+    reactToPost: (state: PostsState, action: PayloadAction<PostReaction>) => {
+      if (state.posts[action.payload.postId]) {
+        const foundReaction = state.posts[
+          action.payload.postId
+        ]?.reactions.find((reaction) => reaction.id === action.payload.id);
+        // Update previous reaction (like/dislike)
+        if (foundReaction) {
+          state.posts[action.payload.postId].reactions =
+            state.posts[action.payload.postId]?.reactions.map((reaction) => {
               if (reaction.id === action.payload.id) {
                 return { ...reaction, isLiked: action.payload.isLiked };
               }
 
               return reaction;
-            });
-          }
-          // Add new reaction
-          else {
-            foundPost.reactions.push(action.payload);
-          }
-
-          return foundPost;
+            }) ?? [];
         }
-
-        return post;
-      });
+        // Add new reaction
+        else {
+          state.posts[action.payload.postId]?.reactions.push(action.payload);
+        }
+      }
     },
     removeReaction: (state, action: PayloadAction<PostReaction>) => {
-      state.posts = state.posts.map((post) => {
-        if (post.id === action.payload.postId) {
-          const foundPost = { ...post };
-          const foundReactionIndex = foundPost.reactions.findIndex(
-            (reaction) => reaction.id === action.payload.id
+      if (state.posts[action.payload.postId]) {
+        const foundReactionIndex = state.posts[
+          action.payload.postId
+        ]?.reactions.findIndex((reaction) => reaction.id === action.payload.id);
+        if (!isUndefined(foundReactionIndex)) {
+          state.posts[action.payload.postId]?.reactions.splice(
+            foundReactionIndex,
+            1
           );
-          foundPost.reactions.splice(foundReactionIndex, 1);
-
-          return foundPost;
         }
-
-        return post;
-      });
+      }
     },
   },
 });

@@ -63,6 +63,13 @@ const Post = ({ post, user }: PostProps) => {
     }
   };
 
+  const date = new Date(Date.UTC(2012, 11, 20, 3, 0, 0));
+  const dateStr = date.toLocaleDateString("en", {
+    // month: "short",
+    // day: "2-digit",
+    dateStyle: "long",
+  });
+
   return (
     <article className="flex text-white gap-4">
       <div className="mt-4">
@@ -77,6 +84,7 @@ const Post = ({ post, user }: PostProps) => {
       <div className="flex-1 flex flex-col gap-2">
         <div className="text-3xl">{post.title}</div>
         <div>{post.body}</div>
+        <div>{dateStr}</div>
         <div className="flex gap-4">
           <div className="flex items-center gap-1">
             <span

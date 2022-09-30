@@ -1,7 +1,7 @@
 import { Comment, Post, PostReaction, User } from "@prisma/client";
 
-export interface PostWithSubData extends Post {
+export type PostWithSubData = Post & {
   user: User;
   comments: Comment[];
   reactions: PostReaction[];
-}
+};

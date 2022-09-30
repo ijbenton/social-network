@@ -1,6 +1,8 @@
+import values from "lodash.values";
 import type { GetServerSideProps, NextPage } from "next";
 import { User } from "next-auth";
 import Head from "next/head";
+import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import Post from "../components/Post";
@@ -13,6 +15,7 @@ import { trpc } from "../utils/trpc";
 const Home: NextPage<{ user: User }> = ({ user }) => {
   const dispatch = useDispatch();
   const posts = useSelector((state: RootState) => state.posts.posts);
+  const postsArr = useMemo(() => values(posts), [posts]);
   const { isLoading } = trpc.useQuery(["post.posts"], {
     // staleTime: Infinity,
     refetchOnMount: false,
@@ -40,7 +43,7 @@ const Home: NextPage<{ user: User }> = ({ user }) => {
                 <Spinner />
               </div>
             ) : (
-              posts?.map((post) => (
+              postsArr?.map((post) => (
                 <Post post={post} user={user} key={post.id} />
               ))
             )}

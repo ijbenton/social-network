@@ -18,6 +18,8 @@
     "@trpc/react": "^9.27.2",
     "@trpc/server": "^9.27.2",
     "formik": "^2.2.9",
+    "lodash.isundefined": "^3.0.1",
+    "lodash.values": "^4.3.0",
     "next": "12.3.1",
     "next-auth": "~4.10.3",
     "react": "18.2.0",
@@ -30,6 +32,9 @@
     "zod": "^3.18.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.186",
+    "@types/lodash.isundefined": "^3.0.7",
+    "@types/lodash.values": "^4.3.7",
     "@types/node": "18.0.0",
     "@types/react": "18.0.14",
     "@types/react-dom": "18.0.5",

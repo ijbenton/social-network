@@ -1,6 +1,5 @@
 import "@testing-library/jest-dom";
 
-import { debug } from "jest-preview";
 import { Session } from "next-auth";
 
 import { render, screen } from "../../utils/test-utils";
@@ -34,10 +33,7 @@ describe("Navbar", () => {
 
   it("displays user profile button", () => {
     render(<Navbar />);
-    debug();
-    // const userMenuBtn = screen.getByTestId("user-menu-button");
-    const userMenuBtn = screen.getByText("Social Network");
-    // const userMenuBtn = screen.getByRole("button");
+    const userMenuBtn = screen.getByTestId("user-menu-button");
 
     expect(userMenuBtn).toBeInTheDocument();
   });

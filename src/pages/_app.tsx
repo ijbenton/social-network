@@ -10,7 +10,7 @@ import type { AppType } from "next/app";
 import { Provider } from "react-redux";
 import superjson from "superjson";
 
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Navbar/Navbar";
 import store from "../redux/store";
 import type { AppRouter } from "../server/router";
 

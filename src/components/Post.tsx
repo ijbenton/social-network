@@ -1,6 +1,7 @@
 import { Comment, Post, PostReaction, User } from "@prisma/client";
 import { User as NextAuthUser } from "next-auth";
 import Image from "next/image";
+import Link from "next/link";
 import React, { useMemo } from "react";
 import {
   FaThumbsDown,
@@ -73,13 +74,17 @@ const Post = ({ post, user }: PostProps) => {
   return (
     <article className="flex text-white gap-4">
       <div className="mt-4">
-        <Image
-          className="h-8 w-8 rounded-full"
-          src={post.user?.image ?? ""}
-          alt=""
-          height={48}
-          width={48}
-        />
+        <Link href={`/users/${post.user.id}`}>
+          <a>
+            <Image
+              className="h-8 w-8 rounded-full"
+              src={post.user?.image ?? ""}
+              alt=""
+              height={48}
+              width={48}
+            />
+          </a>
+        </Link>
       </div>
       <div className="flex-1 flex flex-col gap-2">
         <div className="text-3xl">{post.title}</div>

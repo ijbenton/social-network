@@ -3,7 +3,7 @@ import * as trpc from "@trpc/server";
 import {
   deletePostReactionSchema,
   upsertPostReactionSchema,
-} from "../../schema/reaction.schema";
+} from "../schema/reaction.schema";
 import { createRouter } from "./context";
 
 export const reactionRouter = createRouter()

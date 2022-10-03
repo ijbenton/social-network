@@ -3,6 +3,7 @@ import "../styles/globals.css";
 // src/pages/_app.tsx
 import { httpBatchLink } from "@trpc/client/links/httpBatchLink";
 import { loggerLink } from "@trpc/client/links/loggerLink";
+import { createWSClient, wsLink } from "@trpc/client/links/wsLink";
 import { withTRPC } from "@trpc/next";
 import type { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
@@ -11,6 +12,7 @@ import { Provider } from "react-redux";
 import superjson from "superjson";
 
 import Navbar from "../components/Navbar/Navbar";
+import { env } from "../env/client.mjs";
 import store from "../redux/store";
 import type { AppRouter } from "../server/router";
 
@@ -34,6 +36,16 @@ const getBaseUrl = () => {
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
 
+const getWsLink = () => {
+  const client = createWSClient({
+    url: env.NEXT_PUBLIC_WS_URL || "ws://localhost:3001",
+  });
+
+  return wsLink({
+    client,
+  });
+};
+
 export default withTRPC<AppRouter>({
   config({ ctx }) {
     /**
@@ -50,6 +62,7 @@ export default withTRPC<AppRouter>({
             (opts.direction === "down" && opts.result instanceof Error),
         }),
         httpBatchLink({ url }),
+        getWsLink(),
       ],
       url,
       transformer: superjson,
@@ -59,17 +72,17 @@ export default withTRPC<AppRouter>({
       // queryClientConfig: { defaultOptions: { queries: { staleTime: 60 } } },
 
       // To use SSR properly you need to forward the client's headers to the server
-      // headers: () => {
-      //   if (ctx?.req) {
-      //     const headers = ctx?.req?.headers;
-      //     delete headers?.connection;
-      //     return {
-      //       ...headers,
-      //       "x-ssr": "1",
-      //     };
-      //   }
-      //   return {};
-      // },
+      headers: () => {
+        if (ctx?.req) {
+          const headers = ctx?.req?.headers;
+          // delete headers?.connection;
+          return {
+            ...headers,
+            // "x-ssr": "1",
+          };
+        }
+        return {};
+      },
     };
   },
   /**

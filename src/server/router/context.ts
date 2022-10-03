@@ -1,13 +1,22 @@
+import EventEmitter from "events";
+import { IncomingMessage } from "http";
+
 // src/server/router/context.ts
 import * as trpc from "@trpc/server";
 import * as trpcNext from "@trpc/server/adapters/next";
+import { NodeHTTPCreateContextFnOptions } from "@trpc/server/dist/declarations/src/adapters/node-http";
 import { Session } from "next-auth";
+import ws from "ws";
+
 import { getServerAuthSession } from "../../server/common/get-server-auth-session";
 import { prisma } from "../db/client";
 
 type CreateContextOptions = {
   session: Session | null;
+  ee: EventEmitter;
 };
+
+const ee = new EventEmitter();
 
 /** Use this helper for:
  * - testing, where we dont have to Mock Next.js' req/res
@@ -16,6 +25,7 @@ type CreateContextOptions = {
 export const createContextInner = async (opts: CreateContextOptions) => {
   return {
     session: opts.session,
+    ee: opts.ee,
     prisma,
   };
 };
@@ -25,7 +35,9 @@ export const createContextInner = async (opts: CreateContextOptions) => {
  * @link https://trpc.io/docs/context
  **/
 export const createContext = async (
-  opts: trpcNext.CreateNextContextOptions,
+  opts:
+    | trpcNext.CreateNextContextOptions
+    | NodeHTTPCreateContextFnOptions<IncomingMessage, ws>
 ) => {
   const { req, res } = opts;
 
@@ -34,6 +46,7 @@ export const createContext = async (
 
   return await createContextInner({
     session,
+    ee,
   });
 };
 

@@ -15,7 +15,11 @@ const SinglePost = () => {
 
   if (isLoading) return <Spinner />;
 
-  return <div>SinglePost</div>;
+  return (
+    <div>
+      <h1>{data?.title}</h1>
+    </div>
+  );
 };
 
 export default SinglePost;

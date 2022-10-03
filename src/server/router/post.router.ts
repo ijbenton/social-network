@@ -1,9 +1,6 @@
 import * as trpc from "@trpc/server";
 
-import {
-  createPostSchema,
-  getSinglePostSchema,
-} from "../../schema/post.schema";
+import { createPostSchema, getSinglePostSchema } from "../schema/post.schema";
 import { createRouter } from "./context";
 
 export const postRouter = createRouter()

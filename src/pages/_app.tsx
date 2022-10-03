@@ -12,7 +12,6 @@ import { Provider } from "react-redux";
 import superjson from "superjson";
 
 import Navbar from "../components/Navbar/Navbar";
-import { env } from "../env/client.mjs";
 import store from "../redux/store";
 import type { AppRouter } from "../server/router";
 
@@ -36,15 +35,23 @@ const getBaseUrl = () => {
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
 
-const getWsLink = () => {
+const url = `${getBaseUrl()}/api/trpc`;
+
+function getEndingLink() {
+  if (typeof window === "undefined") {
+    return httpBatchLink({
+      url,
+    });
+  }
+
   const client = createWSClient({
-    url: env.NEXT_PUBLIC_WS_URL || "ws://localhost:3001",
+    url: process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:3001",
   });
 
-  return wsLink({
+  return wsLink<AppRouter>({
     client,
   });
-};
+}
 
 export default withTRPC<AppRouter>({
   config({ ctx }) {
@@ -61,8 +68,7 @@ export default withTRPC<AppRouter>({
             process.env.NODE_ENV === "development" ||
             (opts.direction === "down" && opts.result instanceof Error),
         }),
-        httpBatchLink({ url }),
-        getWsLink(),
+        getEndingLink(),
       ],
       url,
       transformer: superjson,

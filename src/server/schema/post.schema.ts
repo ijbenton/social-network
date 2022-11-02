@@ -5,7 +5,9 @@ export const createPostSchema = z.object({
   body: z.string().min(10),
 });
 
-export type CreatePostInput = z.TypeOf<typeof createPostSchema>;
+export const deletePostSchema = z.object({
+  postId: z.string().cuid(),
+});
 
 export const getSinglePostSchema = z.object({
   postId: z.string().cuid(),

@@ -1,6 +1,6 @@
 import * as trpc from "@trpc/server";
 
-import { createPostSchema, getSinglePostSchema } from "../schema/post.schema";
+import { createPostSchema, deletePostSchema, getSinglePostSchema } from "../schema/post.schema";
 import { createRouter } from "./context";
 
 export const postRouter = createRouter()
@@ -28,6 +28,27 @@ export const postRouter = createRouter()
       return post;
     },
   })
+  .mutation("delete-post", {
+    input: deletePostSchema,
+    async resolve({ input, ctx }) {
+      if (!ctx.session || !ctx.session.user) {
+        throw new trpc.TRPCError({
+          code: "FORBIDDEN",
+          message: "Can not create a post while logged out",
+        });
+      }
+
+      const post = await ctx.prisma.post.deleteMany({
+        where: {
+          id: input.postId,
+          userId: ctx.session.user.id,
+        },
+      });
+
+      return post;
+    },
+  })
+
   .query("posts", {
     resolve({ ctx }) {
       return ctx.prisma.post.findMany({

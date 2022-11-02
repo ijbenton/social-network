@@ -40,9 +40,9 @@ model Session {
 }
 
 model User {
-  id                  String               @id @default(cuid())
+  id                  String                    @id @default(cuid())
   name                String?
-  email               String?              @unique
+  email               String?                   @unique
   emailVerified       DateTime?
   image               String?
   accounts            Account[]
@@ -53,6 +53,8 @@ model User {
   postReactions       PostReaction[]
   commentReactions    CommentReaction[]
   subCommentReactions SubCommentReaction[]
+  conversations       ConversationParticipant[]
+  messages            Message[]
 }
 
 model VerificationToken {
@@ -125,4 +127,35 @@ model SubCommentReaction {
   isLiked      Boolean
   comment      SubComment @relation(fields: [subCommentId], references: [id])
   user         User       @relation(fields: [userId], references: [id])
+}
+
+model Conversation {
+  id              String                    @id @default(cuid())
+  participants    ConversationParticipant[]
+  latestMessageId String?                   @unique
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  messages        Message[]                 @relation("conversationMessages")
+  latestMessage   Message?                  @relation(name: "latestConversationMessage", fields: [latestMessageId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+}
+
+model ConversationParticipant {
+  id                   String       @id @default(cuid())
+  userId               String
+  conversationId       String
+  hasSeenLatestMessage Boolean
+  user                 User         @relation(fields: [userId], references: [id])
+  conversation         Conversation @relation(fields: [conversationId], references: [id])
+}
+
+model Message {
+  id             String        @id @default(cuid())
+  conversationId String
+  senderId       String
+  body           String        @db.Text
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  conversation   Conversation  @relation(name: "conversationMessages", fields: [conversationId], references: [id])
+  isLatestIn     Conversation? @relation("latestConversationMessage")
+  sender         User          @relation(fields: [senderId], references: [id])
 }

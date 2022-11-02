@@ -1,3 +1,4 @@
+import fetch from "node-fetch";
 import superjson from "superjson";
 
 import { chatRouter } from "./chat.router";
@@ -6,6 +7,10 @@ import { createRouter } from "./context";
 import { postRouter } from "./post.router";
 import { reactionRouter } from "./reaction.router";
 import { userRouter } from "./user.router";
+
+if (!global.fetch) {
+  (global.fetch as any) = fetch;
+}
 
 export const appRouter = createRouter()
   .transformer(superjson)

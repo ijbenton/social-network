@@ -18,11 +18,14 @@ export const postSlice = createSlice({
         state.posts[post.id] = post;
       });
     },
+    deletePost: (state, action: PayloadAction<{ id: string }>) => {
+      delete state.posts[action.payload.id];
+    },
     reactToPost: (state: PostsState, action: PayloadAction<PostReaction>) => {
       if (state.posts[action.payload.postId]) {
-        const foundReaction = state.posts[
-          action.payload.postId
-        ]?.reactions.find((reaction) => reaction.id === action.payload.id);
+        const foundReaction = state.posts[action.payload.postId]?.reactions.find(
+          (reaction) => reaction.id === action.payload.id
+        );
         // Update previous reaction (like/dislike)
         if (foundReaction) {
           state.posts[action.payload.postId].reactions =
@@ -42,20 +45,17 @@ export const postSlice = createSlice({
     },
     removeReaction: (state, action: PayloadAction<PostReaction>) => {
       if (state.posts[action.payload.postId]) {
-        const foundReactionIndex = state.posts[
-          action.payload.postId
-        ]?.reactions.findIndex((reaction) => reaction.id === action.payload.id);
+        const foundReactionIndex = state.posts[action.payload.postId]?.reactions.findIndex(
+          (reaction) => reaction.id === action.payload.id
+        );
         if (!isUndefined(foundReactionIndex)) {
-          state.posts[action.payload.postId]?.reactions.splice(
-            foundReactionIndex,
-            1
-          );
+          state.posts[action.payload.postId]?.reactions.splice(foundReactionIndex, 1);
         }
       }
     },
   },
 });
 
-export const { setPosts, reactToPost, removeReaction } = postSlice.actions;
+export const { setPosts, reactToPost, removeReaction, deletePost } = postSlice.actions;
 
 export default postSlice.reducer;
